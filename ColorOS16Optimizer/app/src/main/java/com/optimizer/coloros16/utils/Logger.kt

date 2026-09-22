@@ -1,0 +1,39 @@
+package com.optimizer.coloros16.utils
+
+import android.util.Log
+
+/**
+ * 日志工具类
+ */
+object Logger {
+
+    private const val TAG_PREFIX = "ColorOS16"
+
+    fun init(debugEnabled: Boolean = true) {
+        i(TAG_PREFIX, "Logger initialized")
+    }
+
+    fun v(tag: String, message: String) {
+        Log.v("$TAG_PREFIX/$tag", message)
+    }
+
+    fun d(tag: String, message: String) {
+        Log.d("$TAG_PREFIX/$tag", message)
+    }
+
+    fun i(tag: String, message: String) {
+        Log.i("$TAG_PREFIX/$tag", message)
+    }
+
+    fun w(tag: String, message: String) {
+        Log.w("$TAG_PREFIX/$tag", message)
+    }
+
+    fun e(tag: String, message: String, throwable: Throwable? = null) {
+        if (throwable != null) {
+            Log.e("$TAG_PREFIX/$tag", message, throwable)
+        } else {
+            Log.e("$TAG_PREFIX/$tag", message)
+        }
+    }
+}
