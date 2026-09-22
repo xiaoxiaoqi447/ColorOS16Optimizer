@@ -1,0 +1,97 @@
+package com.optimizer.coloros16
+
+import android.content.Context
+import android.util.Log
+import com.optimizer.coloros16.config.ConfigManager
+import com.optimizer.coloros16.hooks.*
+import com.optimizer.coloros16.utils.Logger
+import org.lsposed.lsplant.LSPApplication
+import org.lsposed.lsplant.callbacks.StyleableCallback
+import org.lsposed.lsplant.hook.HookFactory
+import org.lsposed.lsplant.hook.HookManager
+
+/**
+ * ColorOS 16 优化器 - LSP 模块入口
+ */
+@LSPApplication
+class ModuleEntry : HookFactory() {
+
+    companion object {
+        private const val TAG = "ColorOS16Optimizer"
+
+        const val PACKAGE_SYSTEM_UI = "com.android.systemui"
+        const val PACKAGE_SETTINGS = "com.android.settings"
+
+        lateinit var instance: ModuleEntry
+            private set
+
+        fun isModuleActive(): Boolean = ::instance.isInitialized
+    }
+
+    private lateinit var configManager: ConfigManager
+    private val activeHooks = mutableListOf<BaseHook>()
+
+    override fun onLoad() {
+        super.onLoad()
+        instance = this
+        Logger.init()
+        Logger.i(TAG, "ColorOS 16 优化器模块加载中...")
+
+        try {
+            configManager = ConfigManager.getInstance()
+            initHooks()
+            Logger.i(TAG, "ColorOS 16 优化器模块加载完成")
+        } catch (e: Exception) {
+            Logger.e(TAG, "模块加载失败: ${e.message}")
+        }
+    }
+
+    private fun initHooks() {
+        Logger.d(TAG, "初始化 Hooks...")
+
+        if (configManager.isAnimationEnabled()) {
+            activeHooks.add(AnimationHook(this))
+        }
+        if (configManager.isBatteryEnabled()) {
+            activeHooks.add(BatteryHook(this))
+        }
+        if (configManager.isNetworkEnabled()) {
+            activeHooks.add(NetworkHook(this))
+        }
+        if (configManager.isThemeEnabled()) {
+            activeHooks.add(ThemeHook(this))
+        }
+        if (configManager.isStatusBarEnabled()) {
+            activeHooks.add(StatusBarHook(this))
+        }
+        if (configManager.isNotificationEnabled()) {
+            activeHooks.add(NotificationHook(this))
+        }
+        if (configManager.isSettingsEnabled()) {
+            activeHooks.add(SettingsHook(this))
+        }
+        if (configManager.isPrivacyEnabled()) {
+            activeHooks.add(PrivacyHook(this))
+        }
+
+        activeHooks.forEach { hook ->
+            try {
+                hook.register()
+            } catch (e: Exception) {
+                Logger.e(TAG, "注册 Hook 失败: ${hook.javaClass.simpleName}")
+            }
+        }
+
+        Logger.i(TAG, "已启用 ${activeHooks.size} 个 Hooks")
+    }
+
+    override fun registerHooker() {
+        HookManager.addCallback(object : StyleableCallback() {
+            override fun onSystemServerStarted() {
+                Logger.d(TAG, "System Server 已启动")
+            }
+        })
+    }
+
+    fun getConfigManager(): ConfigManager = configManager
+}
