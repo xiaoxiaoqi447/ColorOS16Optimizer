@@ -1,0 +1,68 @@
+package com.optimizer.coloros16.config
+
+import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
+
+/**
+ * 配置管理器
+ */
+class ConfigManager private constructor() {
+
+    companion object {
+        private const val TAG = "ConfigManager"
+        private const val PREFS_NAME = "coloros16_optimizer_prefs"
+
+        @Volatile
+        private var instance: ConfigManager? = null
+
+        fun getInstance(): ConfigManager {
+            return instance ?: synchronized(this) {
+                instance ?: ConfigManager().also { instance = it }
+            }
+        }
+    }
+
+    private lateinit var prefs: SharedPreferences
+    private var context: Context? = null
+
+    fun init(context: Context) {
+        this.context = context.applicationContext
+        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+
+    // 动画优化
+    fun isAnimationEnabled() = prefs.getBoolean("animation_enabled", true)
+    fun getAnimationSpeed() = prefs.getFloat("animation_speed", 1.0f)
+
+    // 电池优化
+    fun isBatteryEnabled() = prefs.getBoolean("battery_enabled", true)
+    fun getBackgroundLimit() = prefs.getInt("background_limit", 4)
+    fun isBatterySaverEnhanced() = prefs.getBoolean("battery_saver_enhanced", true)
+
+    // 网络优化
+    fun isNetworkEnabled() = prefs.getBoolean("network_enabled", true)
+    fun isDnsOptimization() = prefs.getBoolean("dns_optimization", true)
+
+    // 主题定制
+    fun isThemeEnabled() = prefs.getBoolean("theme_enabled", true)
+    fun isUnlockThemes() = prefs.getBoolean("unlock_themes", true)
+
+    // 状态栏
+    fun isStatusBarEnabled() = prefs.getBoolean("statusbar_enabled", true)
+    fun isShowNetworkSpeed() = prefs.getBoolean("show_network_speed", false)
+    fun isBatteryPercentage() = prefs.getBoolean("battery_percentage", true)
+
+    // 通知栏
+    fun isNotificationEnabled() = prefs.getBoolean("notification_enabled", true)
+    fun isNotificationGrouping() = prefs.getBoolean("notification_grouping", true)
+
+    // 系统设置
+    fun isSettingsEnabled() = prefs.getBoolean("settings_enabled", true)
+    fun isShowHiddenSettings() = prefs.getBoolean("show_hidden_settings", true)
+
+    // 隐私增强
+    fun isPrivacyEnabled() = prefs.getBoolean("privacy_enabled", true)
+    fun isTrackingProtection() = prefs.getBoolean("tracking_protection", true)
+    fun isMicrophoneProtection() = prefs.getBoolean("microphone_protection", true)
+}
