@@ -1,0 +1,49 @@
+package com.optimizer.coloros16.hooks
+
+import com.optimizer.coloros16.BaseHook
+import com.optimizer.coloros16.ModuleEntry
+import com.optimizer.coloros16.config.ConfigManager
+import com.optimizer.coloros16.utils.Logger
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedHelpers
+
+/**
+ * 主题定制 Hook
+ */
+class ThemeHook(moduleEntry: ModuleEntry) : BaseHook(moduleEntry) {
+
+    private val configManager = moduleEntry.getConfigManager()
+
+    override fun getTag() = "ThemeHook"
+
+    override fun getTargetPackages() = listOf(
+        "com.android.thememanager",
+        "com.coloros.thememanager"
+    )
+
+    override fun register() {
+        if (!configManager.isThemeEnabled()) {
+            enable()
+            return
+        }
+
+        try {
+            XposedHelpers.findAndHookMethod(
+                "android.app.WallpaperManager",
+                null,
+                "isWallpaperSupported",
+                object : XC_MethodHook<Boolean>() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        if (!isEnabled) return
+                        if (configManager.isUnlockThemes()) {
+                            param.result = true
+                        }
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            Logger.e(TAG, "ThemeHook 注册失败: ${e.message}")
+        }
+        enable()
+    }
+}
