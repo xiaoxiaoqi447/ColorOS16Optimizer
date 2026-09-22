@@ -1,0 +1,37 @@
+package com.optimizer.coloros16.ui
+
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.optimizer.coloros16.R
+import com.optimizer.coloros16.config.ConfigManager
+import com.optimizer.coloros16.utils.Logger
+
+/**
+ * 模块配置界面
+ */
+class ModuleActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "ModuleActivity"
+    }
+
+    private lateinit var configManager: ConfigManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_module)
+
+        configManager = ConfigManager.getInstance()
+        if (!::configManager.isInitialized) {
+            configManager.init(this)
+        }
+
+        Logger.i(TAG, "ModuleActivity 创建完成")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Toast.makeText(this, "ColorOS 16 优化器已激活", Toast.LENGTH_SHORT).show()
+    }
+}
