@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ColorOS 16 优化器</string>
+    <string name="animation_speed">动画速度</string>
+    <string name="battery_optimization">电池优化</string>
+    <string name="network_optimization">网络优化</string>
+    <string name="theme_customization">主题定制</string>
+    <string name="statusbar_speed">显示网速</string>
+    <string name="privacy_enhancement">隐私增强</string>
+</resources>
