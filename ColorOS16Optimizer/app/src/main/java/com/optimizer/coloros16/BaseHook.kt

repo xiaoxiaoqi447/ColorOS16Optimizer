@@ -1,0 +1,31 @@
+package com.optimizer.coloros16
+
+import com.optimizer.coloros16.utils.Logger
+import org.lsposed.lsplant.hook.Hook
+
+/**
+ * 基础 Hook 类
+ */
+abstract class BaseHook(protected val moduleEntry: ModuleEntry) : Hook() {
+
+    companion object {
+        protected const val TAG = "BaseHook"
+    }
+
+    protected var isEnabled = false
+
+    abstract fun register()
+    protected abstract fun getTag(): String
+    protected abstract fun getTargetPackages(): List<String>
+
+    protected fun isTargetPackage(packageName: String?, targets: List<String>): Boolean {
+        return targets.any { target ->
+            packageName?.contains(target, ignoreCase = true) == true
+        }
+    }
+
+    protected fun enable() {
+        isEnabled = true
+        Logger.d(getTag(), "Hook 已启用")
+    }
+}
