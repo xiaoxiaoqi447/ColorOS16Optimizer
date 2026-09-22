@@ -1,0 +1,48 @@
+package com.optimizer.coloros16.hooks
+
+import com.optimizer.coloros16.BaseHook
+import com.optimizer.coloros16.ModuleEntry
+import com.optimizer.coloros16.config.ConfigManager
+import com.optimizer.coloros16.utils.Logger
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedHelpers
+import java.net.InetAddress
+
+/**
+ * 网络优化 Hook
+ */
+class NetworkHook(moduleEntry: ModuleEntry) : BaseHook(moduleEntry) {
+
+    private val configManager = moduleEntry.getConfigManager()
+
+    override fun getTag() = "NetworkHook"
+
+    override fun getTargetPackages() = listOf(
+        "com.android.net",
+        "com.android.systemui"
+    )
+
+    override fun register() {
+        if (!configManager.isDnsOptimization()) {
+            enable()
+            return
+        }
+        
+        try {
+            XposedHelpers.findAndHookMethod(
+                InetAddress::class.java,
+                "getAllByName",
+                String::class.java,
+                object : XC_MethodHook<Array<InetAddress>>() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        if (!isEnabled) return
+                        Logger.d(TAG, "DNS 解析: ${param.args[0]}")
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            Logger.e(TAG, "NetworkHook 注册失败: ${e.message}")
+        }
+        enable()
+    }
+}
