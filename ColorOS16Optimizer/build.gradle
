@@ -1,14 +1,21 @@
-# Project-wide Gradle settings.
-org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-org.gradle.parallel=true
-org.gradle.caching=true
+// Top-level build file
+buildscript {
+    ext {
+        compileSdk = 34
+        minSdk = 24
+        targetSdk = 34
+        kotlin_version = '1.9.22'
+        agp_version = '8.2.2'
+        lsp_version = 'v1.3.5'
+    }
+}
 
-# AndroidX
-android.useAndroidX=true
-android.enableJetifier=true
+plugins {
+    id 'com.android.application' version "$agp_version" apply false
+    id 'com.android.library' version "$agp_version" apply false
+    id 'org.jetbrains.kotlin.android' version "$kotlin_version" apply false
+}
 
-# Kotlin
-kotlin.code.style=official
-
-# Non-transitive R classes
-android.nonTransitiveRClass=true
+tasks.register('clean', Delete) {
+    delete rootProject.buildDir
+}
