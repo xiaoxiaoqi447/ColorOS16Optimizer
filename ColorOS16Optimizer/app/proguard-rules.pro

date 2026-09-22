@@ -1,0 +1,16 @@
+# Add project specific ProGuard rules here.
+-keepattributes *Annotation*
+
+# LSPosed
+-keep class * extends org.lsposed.lsplant.callbacks.StyleableCallback { *; }
+-keep class * extends org.lsposed.lsplant.callbacks.BaseCallback { *; }
+-keep class * extends org.lsposed.lsplant.hook.Hook { *; }
+
+# Keep module class
+-keep class com.optimizer.coloros16.** { *; }
+
+# Keep Xposed
+-keep class * implements de.robv.android.xposed.IXposedHookLoadPackage { *; }
+-keep class * implements de.robv.android.xposed.IXposedHookInitPackageResources { *; }
+-keep class * implements de.robv.android.xposed.callbacks.XC_LoadPackage { *; }
+-keep class * implements de.robv.android.xposed.callbacks.XC_InitPackageResources { *; }
