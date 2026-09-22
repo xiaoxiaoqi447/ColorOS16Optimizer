@@ -1,0 +1,46 @@
+package com.optimizer.coloros16.hooks
+
+import com.optimizer.coloros16.BaseHook
+import com.optimizer.coloros16.ModuleEntry
+import com.optimizer.coloros16.config.ConfigManager
+import com.optimizer.coloros16.utils.Logger
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedHelpers
+
+/**
+ * 电池优化 Hook
+ */
+class BatteryHook(moduleEntry: ModuleEntry) : BaseHook(moduleEntry) {
+
+    private val configManager = moduleEntry.getConfigManager()
+
+    override fun getTag() = "BatteryHook"
+
+    override fun getTargetPackages() = listOf(
+        "com.android.systemui",
+        "com.android.settings"
+    )
+
+    override fun register() {
+        try {
+            XposedHelpers.findAndHookMethod(
+                "com.android.server.am.ActivityManagerService",
+                null,
+                "getProcessLimitLocked",
+                Int::class.javaPrimitiveType,
+                object : XC_MethodHook<Int>() {
+                    override fun afterHookedMethod(param: MethodHookParam) {
+                        if (!isEnabled) return
+                        val limit = configManager.getBackgroundLimit()
+                        if (limit > 0) {
+                            param.result = limit
+                        }
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            Logger.e(TAG, "BatteryHook 注册失败: ${e.message}")
+        }
+        enable()
+    }
+}
