@@ -1,0 +1,49 @@
+package com.optimizer.coloros16.hooks
+
+import com.optimizer.coloros16.BaseHook
+import com.optimizer.coloros16.ModuleEntry
+import com.optimizer.coloros16.config.ConfigManager
+import com.optimizer.coloros16.utils.Logger
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedHelpers
+
+/**
+ * 状态栏优化 Hook
+ */
+class StatusBarHook(moduleEntry: ModuleEntry) : BaseHook(moduleEntry) {
+
+    private val configManager = moduleEntry.getConfigManager()
+
+    override fun getTag() = "StatusBarHook"
+
+    override fun getTargetPackages() = listOf(
+        "com.android.systemui",
+        "com.coloros.systemui"
+    )
+
+    override fun register() {
+        if (!configManager.isStatusBarEnabled()) {
+            enable()
+            return
+        }
+
+        try {
+            XposedHelpers.findAndHookMethod(
+                "com.android.systemui.statusbar.policy.BatteryController",
+                null,
+                "shouldShowBatteryLevel",
+                object : XC_MethodHook<Boolean>() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        if (!isEnabled) return
+                        if (configManager.isBatteryPercentage()) {
+                            param.result = true
+                        }
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            Logger.e(TAG, "StatusBarHook 注册失败: ${e.message}")
+        }
+        enable()
+    }
+}
