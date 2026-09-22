@@ -1,0 +1,50 @@
+package com.optimizer.coloros16.hooks
+
+import com.optimizer.coloros16.BaseHook
+import com.optimizer.coloros16.ModuleEntry
+import com.optimizer.coloros16.config.ConfigManager
+import com.optimizer.coloros16.utils.Logger
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedHelpers
+
+/**
+ * 隐私增强 Hook
+ */
+class PrivacyHook(moduleEntry: ModuleEntry) : BaseHook(moduleEntry) {
+
+    private val configManager = moduleEntry.getConfigManager()
+
+    override fun getTag() = "PrivacyHook"
+
+    override fun getTargetPackages() = listOf(
+        "com.android.permissioncontroller",
+        "com.android.systemui"
+    )
+
+    override fun register() {
+        if (!configManager.isPrivacyEnabled()) {
+            enable()
+            return
+        }
+
+        try {
+            XposedHelpers.findAndHookMethod(
+                "com.android.server.pm.permission.PermissionManagerService",
+                null,
+                "checkPermission",
+                String::class.java,
+                String::class.java,
+                Int::class.javaPrimitiveType,
+                object : XC_MethodHook<Int>() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        if (!isEnabled) return
+                        Logger.d(TAG, "权限检查: ${param.args[1]} 请求 ${param.args[0]}")
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            Logger.e(TAG, "PrivacyHook 注册失败: ${e.message}")
+        }
+        enable()
+    }
+}
