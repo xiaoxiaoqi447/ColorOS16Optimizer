@@ -1,0 +1,54 @@
+package com.optimizer.coloros16.hooks
+
+import android.provider.Settings
+import com.optimizer.coloros16.BaseHook
+import com.optimizer.coloros16.ModuleEntry
+import com.optimizer.coloros16.config.ConfigManager
+import com.optimizer.coloros16.utils.Logger
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedHelpers
+
+/**
+ * 系统动画优化 Hook
+ */
+class AnimationHook(moduleEntry: ModuleEntry) : BaseHook(moduleEntry) {
+
+    private val configManager = moduleEntry.getConfigManager()
+
+    override fun getTag() = "AnimationHook"
+
+    override fun getTargetPackages() = listOf(
+        "com.android.systemui",
+        "com.android.launcher",
+        "com.coloros.launcher"
+    )
+
+    override fun register() {
+        try {
+            XposedHelpers.findAndHookMethod(
+                "android.provider.Settings\$Global",
+                null,
+                "getFloat",
+                android.content.ContentResolver::class.java,
+                String::class.java,
+                Float::class.javaPrimitiveType,
+                object : XC_MethodHook<Float>() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        if (!isEnabled) return
+                        val name = param.args[1] as String
+                        if (name == Settings.Global.WINDOW_ANIMATION_SCALE) {
+                            param.result = configManager.getAnimationSpeed()
+                        } else if (name == Settings.Global.TRANSITION_ANIMATION_SCALE) {
+                            param.result = configManager.getAnimationSpeed()
+                        } else if (name == Settings.Global.ANIMATOR_DURATION_SCALE) {
+                            param.result = configManager.getAnimationSpeed()
+                        }
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            Logger.e(TAG, "AnimationHook 注册失败: ${e.message}")
+        }
+        enable()
+    }
+}
