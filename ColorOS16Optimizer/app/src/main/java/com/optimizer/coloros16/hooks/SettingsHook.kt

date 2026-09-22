@@ -1,0 +1,50 @@
+package com.optimizer.coloros16.hooks
+
+import com.optimizer.coloros16.BaseHook
+import com.optimizer.coloros16.ModuleEntry
+import com.optimizer.coloros16.config.ConfigManager
+import com.optimizer.coloros16.utils.Logger
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedHelpers
+
+/**
+ * 系统设置增强 Hook
+ */
+class SettingsHook(moduleEntry: ModuleEntry) : BaseHook(moduleEntry) {
+
+    private val configManager = moduleEntry.getConfigManager()
+
+    override fun getTag() = "SettingsHook"
+
+    override fun getTargetPackages() = listOf(
+        "com.android.settings",
+        "com.coloros.system"
+    )
+
+    override fun register() {
+        if (!configManager.isSettingsEnabled()) {
+            enable()
+            return
+        }
+
+        try {
+            XposedHelpers.findAndHookMethod(
+                "com.android.providers.settings.SettingsProvider",
+                null,
+                "getString",
+                android.database.sqlite.SQLiteDatabase::class.java,
+                String::class.java,
+                String::class.java,
+                object : XC_MethodHook<String?>() {
+                    override fun beforeHookedMethod(param: MethodHookParam) {
+                        if (!isEnabled) return
+                        Logger.d(TAG, "获取设置: ${param.args[2]}")
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            Logger.e(TAG, "SettingsHook 注册失败: ${e.message}")
+        }
+        enable()
+    }
+}
